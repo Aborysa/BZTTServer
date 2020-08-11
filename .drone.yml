@@ -1,0 +1,21 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: publish
+    image: plugins/docker
+    when:
+      event:
+        - tag
+      branch:
+        - master
+      
+    settings:
+      repo: thejanne/bztt-server
+      username: thejanne
+      password:
+        from_secret: PLUGIN_AUTH
+      tags:
+      - latest
+      - ${DRONE_TAG}
