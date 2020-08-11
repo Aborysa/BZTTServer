@@ -1,0 +1,18 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: publish
+    image: plugins/docker
+    when:
+      event:
+        - tag
+      branch:
+        - master
+      
+    settings:
+      repo: foo/bar
+      tags:
+      - latest
+      - ${DRONE_TAG}
