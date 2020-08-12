@@ -77,6 +77,7 @@ export class BZTTClientConnection {
     this.onDestroy = onDestroy
     this.socket.on("data", (...a) => this.handleData(...a))
     this.socket.on("close", () => this._cleanup())
+    this.socket.on("error", (error) => log.error({error}))
 
     this.subscribedTopics = new Map()
     this.connected = false
