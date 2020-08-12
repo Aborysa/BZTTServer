@@ -105,6 +105,18 @@ export class BZTTClientConnection {
     this.onDestroy()
   }
 
+  write(...a){
+    if(!this.socket.destroyed){
+      this.socket.write(...a)
+    }
+  }
+
+  end(...a){
+    if(!this.socket.destroyed){
+      this.socket.end(...a)
+    }
+  }
+
   handleCompleteMessage(msg) {
     log.debug(`Got message ${msg.type} ${msg.id}`)
     if (this.connected) {
@@ -112,7 +124,7 @@ export class BZTTClientConnection {
         case T_DISCONNECT: {
           this.connectedUser = undefined
           this.connected = false
-          this.socket.end(
+          this.end(
             this._createMessage(T_DISCONNECT_ACK, {id: msg.id}, 0),
           )
           break
@@ -124,13 +136,13 @@ export class BZTTClientConnection {
             const subscribtion = topic
               .observe(this.connectedUser)
               .subscribe((payload) => {
-                this.socket.write(
+                this.write(
                   this._createMessage(T_PUSH, {topic: topicName}, payload),
                 )
               })
             this.subscribedTopics.set(topicName, subscribtion)
           }
-          this.socket.write(
+          this.write(
             this._createMessage(T_SUBSCRIBE_ACK, {id: msg.id}, 0),
           )
           break
@@ -141,7 +153,7 @@ export class BZTTClientConnection {
             this.subscribedTopics.get(topicName).unsubscribe()
             this.subscribedTopics.delete(topicName)
           }
-          this.socket.write(
+          this.write(
             this._createMessage(T_UNSUBSCRIBE_ACK, {id: msg.id}, 0),
           )
           break
@@ -151,11 +163,11 @@ export class BZTTClientConnection {
           const topic = this.topicManager.getTopic(msg.payload.topic)
           if(topic){
             topic.publish(this.connectedUser, msg.payload.data)
-            this.socket.write(this._createMessage(T_PUBLISH_ACK, {id: msg.id}, 0))
+            this.write(this._createMessage(T_PUBLISH_ACK, {id: msg.id}, 0))
           }
           else{
             log.debug({error: `Topic does not exist ${msg.payload.topic}`})
-            this.socket.write(this._createMessage(T_PUBLISH_ACK, {id: msg.id}, 1))
+            this.write(this._createMessage(T_PUBLISH_ACK, {id: msg.id}, 1))
           }
           break
         }
@@ -172,7 +184,7 @@ export class BZTTClientConnection {
           this.connectedUser = msg.payload
           this.connected = true
           log.debug(`User connected: ${this.connectedUser.userId} ${this.connectedUser.username}`)
-          this.socket.write(this._createMessage(T_CONNECT_ACK, {id: msg.id}, 0))
+          this.write(this._createMessage(T_CONNECT_ACK, {id: msg.id}, 0))
           break
         }
 

@@ -20,9 +20,13 @@ server.listen(BIND_PORT, BIND_ADDRESS, () => {
 const bzttClients = new Set()
 
 server.on("connection", (socket) => {
-  socket.setKeepAlive(true, 60 * 1000)
-  const connection = new BZTTClientConnection(socket, topicManager, () =>
-    bzttClients.delete(connection),
-  )
-  bzttClients.add(connection)
+  try{
+    socket.setKeepAlive(true, 60 * 1000)
+    const connection = new BZTTClientConnection(socket, topicManager, () =>
+      bzttClients.delete(connection),
+    )
+    bzttClients.add(connection)
+  } catch(err) {
+    log.error({err, message: 'BZTTClient crashed!'})
+  }
 })
