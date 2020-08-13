@@ -44,7 +44,7 @@ class Topic {
 class ChatTopic extends Topic {
   publish(publishingUser, message) {
     for (const [user, observer] of this.userList) {
-      observer.next(Buffer.from(`${publishingUser}: ${message.toString()}`))
+      observer.next(Buffer.from(`${publishingUser.username}: ${message.toString()}`))
     }
   }
 }
